@@ -35,6 +35,7 @@ trials = map(1:1000) do i
     simulate(true_model, stimulus)
 end
 
+
 #= 
 Note regarding the do syntax: The above is equivalent to:
 
@@ -170,8 +171,10 @@ hline!([-true_logp], color=:red)
 # but I've found that it makes the results more robust because you make sure to
 # at least roughly search the entire space.
 
+
 plot(76:300, nll_trace[76:end], ylabel="Negative Log Likelihood", xlabel="Iteration")
 hline!([-true_logp], color=:red)
+
 # That looks more reasonable.
 
 # %% --------
@@ -210,7 +213,11 @@ function plot_gp_result(space, result)
     plot(plots..., size=(600, 600))
 end
 
+# Export the plot as a PNG file
+
+
 plot_gp_result(space, result_gp)
+savefig(plot_gp_result(space, result_gp), "plot_gp_result.png")
 
 #=
 Assuming the random seed worked, you'll see that the GP captured the true
@@ -244,8 +251,8 @@ end
 recovered_better = Model(;better_space(choose_optimum(better_result))...)
 log_likelihood(recovered_better, trials) - true_logp
 # Much better! 
-
 plot_gp_result(better_space, better_result)
+savefig(plot_gp_result(better_space, better_result), "plot_gp_result_better.png")
 # This is exactly what we want our GP to look like. Low uncertainty near
 # the optimum and reasonable and similar scales on all the y axes.
 

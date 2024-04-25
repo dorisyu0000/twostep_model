@@ -1,4 +1,7 @@
+using Pkg
 using Distributed
+
+
 @time @everywhere begin
     include("ddm.jl")
     include("box.jl")
@@ -37,9 +40,9 @@ using Distributed
     function log_likelihood(model::LapseModel, t::Trial; rt_tol=1)
         n_rt_hits = length(max(1, t.rt - rt_tol):min(model.max_rt, t.rt + rt_tol))
         log(1 / model.N) + log(n_rt_hits / model.max_rt)
-    end
+    end 
 
-    function log_likelihood(model::DDM, trials::Vector{Trial}; parallel=false, ε=.01, rt_tol=1, kws...)
+    function log_likelihood(model::DDM, trials::Vector{Trial}; parallel=false, ε=.01, rt_tol=10, kws...)
         lapse = LapseModel(trials)
         min_logp = log_likelihood(lapse, trials; rt_tol)
         ibs(trials; parallel, min_logp, kws...) do t
@@ -57,12 +60,17 @@ end
 # generate some trials
 
 Random.seed!(1)
+
 model = DDM(d=.03, σ=.2,)
-trials = map(1:500) do i
+
+trials = map(1:100) do i
     v = randn(3)
     choice, rt = simulate(model, v)
     Trial(v, choice, rt)
-end;
+end
+
+prm = (d=.01, σ=.2)
+log_likelihood(DDM(;prm...), trials; rt_tol=10, repeats=2)
 
 # %% --------
 # define search space
@@ -73,13 +81,13 @@ box = Box(
 )
 
 # %% --------
-# grid search
-
+# grid rch
 params = grid(5, box)
 
 like_grid = @showprogress pmap(params) do prm
-    log_likelihood(DDM(;prm...), trials; rt_tol=1, repeats=3)
+    log_likelihood(DDM(;prm...), trials; rt_tol=10, repeats=2)
 end
+
 
 # serialize("results/like_grid", like_grid)
 # like_grid = deserialize("results/like_grid")
@@ -103,7 +111,7 @@ initX = sobol(20, box)
 init = @showprogress map(initX) do x
     model = DDM(;box(x)...)
     log_likelihood(model, trials; repeats=5)
-end
+end;
 
 # IBS gives a variance estimate, so we tell this to the Gaussian Process
 lognoise = log(maximum(getfield.(init, :std)))
@@ -117,6 +125,7 @@ result_gp = gp_minimize(length(box); iterations=180, verbose=true, init_Xy, nois
     model = DDM(;box(x)...)
     -log_likelihood(model, trials; repeats=5).logp
 end
+
 
 serialize("results/gp", result_gp)
 

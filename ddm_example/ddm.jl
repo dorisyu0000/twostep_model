@@ -8,8 +8,7 @@ using Base: @kwdef
     threshold::Float64 = 1
 end
 
-function check_termination(dv, threshold)
-    # hardcoding the termination criterion for small N makes it a lot faster
+function check_termination(dv, threshold)    # hardcoding the termination criterion for small N makes it a lot faster
     if length(dv) == 2
         a, b = dv
         a - b > threshold && return 1
