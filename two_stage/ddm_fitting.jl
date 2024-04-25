@@ -31,26 +31,26 @@ using Distributed
     end
 
     struct LapseModel
-        N::Int  # Number of options at stage 2 (assuming max number of paths possible)
-        max_rt1::Int
-        max_rt2::Int
+        N::Int  # number of paths
+        max_rt::Int
+        min_rt1::Int
+        min_rt2::Int
     end
     
     function LapseModel(trials::Vector{Trial})
-        N = maximum([length(trial.value2) for trial in trials])  # Maximum number of paths in stage 2
-        max_rt1 = maximum(trial.rt1 for trial in trials)
-        max_rt2 = maximum(trial.rt2 for trial in trials)
-        max_rt1 = round(Int, max_rt1)
-        max_rt2 = round(Int, max_rt2)
-        return LapseModel(N, max_rt1, max_rt2)
+        N = maximum(length(trial.value2) for trial in trials)  # Maximum number of paths
+        max_rt = maximum(trial.rt1 + trial.rt2 for trial in trials)
+        min_rt1 = minimum(trial.rt1 for trial in trials)
+        min_rt2 = minimum(trial.rt2 for trial in trials)
+        return LapseModel(N, max_rt, min_rt1, min_rt2)
     end
     
     function simulate_two_stage_lapse(model::LapseModel)
-        choice2 = rand(1:model.N)  
-        rt1 = rand(1:model.max_rt1)  # Random reaction time for the first stage
-        rt2 = rand(1:model.max_rt2)  # Random reaction time for the second stage
-        choice1 = choice2 <= 2 ? 1 : 2
-        return (choice1, rt1, choice2, rt2)
+        (;N, max_rt, min_rt1, min_rt2) = model
+        choice = rand(1:N)
+        rt1 = rand(min_rt1:max_rt-min_rt2-1)  # Random reaction time for the first stage
+        rt2 = rand(min_rt2:max_rt-rt1)  # Random reaction time for the second stage
+        return (choice, rt1, rt2)
     end
     
 

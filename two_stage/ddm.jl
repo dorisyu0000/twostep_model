@@ -1,16 +1,16 @@
 using Random
 using Distributions
 using Base: @kwdef
-using Revise
+# using Revise
 
 @kwdef struct DDM
     # d::Float64 = .0002
-    d1::Float64 = .0002
-    d2::Float64 = .0002
+    d1::Float64 = .0001
+    d2::Float64 = .0001
     threshold1::Float64 = 0.8
     threshold2::Float64 = 1.0
-    t1_error::Float64 = 0.1
-    t2_error::Float64 = 0.1
+    t1_error::Int = 1
+    t2_error::Int = 1
 end
 
 
@@ -91,77 +91,63 @@ end
 
 function simulate_two_stage(model::DDM, v1::Vector{Float64}, v2::Vector{Float64}; maxt=5000, logger=(dv, t) -> nothing)
     N = length(v2)  # There are always 3/4 options in the two-stage decision model
-    dv = zeros(N)
-    noise1 = Normal(0,0.5)
-    noise2 = Normal(0,0.5)
+    noise1 = Normal(0,0.1)
+    noise2 = Normal(0,0.1)
     t1_error = model.t1_error
     t2_error = model.t2_error
     v,v1,v2 = value_function(v1, v2)
-    stage1_drifts = model.d1 .* v + model.d1 .* v1
+    stage1_drifts = model.d1 .* v
     stage2_drifts = model.d2 .* v2 
     
     rt1, rt2 = 0, 0
-    decision2 = 0, 0
-    choice1,choice2 = 0,0 
-    
+    choice1, choice2 = 0, 0
+
+    # Stage 1: Decide between L and R
+    # dv_stage1 = zeros(N)
+    dv = zeros(N)
     for t in 1:maxt
+        for i in 1:N
+            dv[i] += stage1_drifts[i] + rand(noise1)
+        end
+        choice1 = final_termination(dv, model.threshold1)
+        if choice1 != 0
+            rt1 = t + t1_error
+            break
+        end
+    end
+
+    # if model.restart_stage2
+    #     dv .= 0
+    # end
+
+    # Stage 2
+    if N == 3
+        indices = choice1 < 3 ? [1,2] : [3]  # Adjusted for a 3-option scenario
+    elseif N == 4
+        indices = choice1 < 3 ? [1, 2] : [3, 4]  # Original setup for 4 options
+    end
+
+    # Assuming decision can be made directly if only one option
+    if length(indices) == 1
+        rt2 = t2_error # Assuming a fixed time for the second decision
+        return (choice1, rt1, rt2)
+    end
+
+    # Otherwise, possibly change decision
+    for t in 1:(maxt-rt1)
         # Stage 1: Decide between L and R
-        if rt1 == 0  # Still in stage 1
-            dv_stage1 = zeros(N)
-            for i in 1:N
-                dv_stage1[i] += stage1_drifts[i] + rand(noise1) 
-            choice = final_termination(dv_stage1, model.threshold1)
-            if choice == 1 || choice == 2  # Decision made
-                choice1  = 1
-                rt1 = t + t1_error
-                continue  
-            elseif choice == 3 || choice == 4  # Decision made
-                choice1  = 2
-                rt1 = t + t1_error
-                continue
-            end
+        for i in indices
+            dv[i] += stage2_drifts[i] + rand(noise2)  # Continue accumulating evidence for the second decision
         end
+        choice = final_termination(@view(dv[indices]), model.threshold2)  # Pass the relevant evidence to final_termination
 
-        else  # Stage 2
-            if N == 3
-                indices = choice1 == 1 ? [1,2] : [3]  # Adjusted for a 3-option scenario
-            elseif N == 4
-                indices = choice1 == 1 ? [1, 2] : [3, 4]  # Original setup for 4 options
-            end
-            for i in indices
-                dv[i] += stage2_drifts[i] + rand(noise2)  # Continue accumulating evidence for the second decision
-            end
-            if length(indices) == 1
-                choice = 1  # Assuming decision can be made directly if only one option
-                decision2 = 10 * choice1 + choice
-                rt2 = t2_error# Assuming a fixed time for the second decision
-                break
-            else
-                choice = final_termination(dv[indices], model.threshold2)  # Pass the relevant evidence to final_termination
-            end
-                if choice != 0
-                decision2 = 10*choice1 + choice  # Construct decision2 as per requirement
-                rt2 = t - rt1 + 10+ t2_error # Calculate the reaction time for the second decision
-                break
-            end
+        if choice != 0
+            choice2 = indices[choice]
+            rt2 = t + t2_error # Calculate the reaction time for the second decision
+            return (choice2, rt1, rt2)
         end
     end
-
-    if decision2 == 11
-        choice2 = 1
-    elseif decision2 == 12
-        choice2 = 2
-    elseif decision2 == 21
-        choice2 = 3
-    elseif decision2 == 22
-        choice2 = 4
-    end
-
-    if choice1 == 0
-        (0, 0, -1, -1)  # In case no decision was made
-    else
-        (choice1, choice2, rt1, rt2)
-    end
+    return (0, -1, -1)
 end
 
 
