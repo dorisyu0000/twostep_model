@@ -9,8 +9,8 @@ using Base: @kwdef
     d2::Float64 = .0001
     threshold1::Float64 = 0.8
     threshold2::Float64 = 1.0
-    t1_error::Int = 1
-    t2_error::Int = 1
+    t1_error::Float64  = 15
+    t2_error::Float64  = 10
 end
 
 

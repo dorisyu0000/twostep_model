@@ -32,10 +32,9 @@ using JSON
                 trial = Trial(
                     Float64.(data["value1"]),
                     Float64.(data["value2"]),
-                    data["choice1"],
                     data["choice2"],
-                    Int(round(data["rt1"] / 100)),
-                    Int(round(data["rt2"] / 100))
+                    Int(round(data["rt1"])),
+                    Int(round(data["rt2"]))
 
                 )
                 push!(trials, trial)
@@ -47,12 +46,8 @@ trials1 = load_trials("/Users/dorisyu/Documents/GitHub/fitting_example/trials1.j
 trials2 = load_trials("/Users/dorisyu/Documents/GitHub/fitting_example/trials2.json")
 
 # Define the DDM model parameters
-parameters1 = [0.005047848112247565
-0.055
-0.75
-1.25
-3.0
-3.0]
+parameters1 = [ 0.005001713335601045, 0.0504784811224757, 1.0, 1.5, 10, 10]
+
 # parameters2 = [0.04335455108562024, 0.0885242554918941, 0.3969524656211612, 0.3358071042959825, 0.9960389831987981, 1.0047869628386545, 0.21312658886546265]
 model1 = DDM(parameters1...)
 model2 = DDM(parameters2...)
@@ -62,8 +57,8 @@ model2 = DDM(parameters2...)
 # Here is a placeholder for the function:
 
 function simulate_two_stage(model, v1, v2)
-    choice1, choice2, rt1, rt2 = simulate_two_stage(model, v1,v2)
-    return choice1, choice2, rt1, rt2
+    choice, rt1, rt2 = simulate_two_stage(model, v1,v2)
+    return choice, rt1, rt2
 end
 
 function calculate_difficulty(trials)
@@ -78,8 +73,8 @@ end
 random_trial1 = map(trials1) do trial
     v1 = trial.value1
     v2 = trial.value2
-    choice1, choice2, rt1, rt2 = simulate_two_stage(model1, v1, v2)
-    Trial(v1, v2, choice1, choice2, rt1, rt2)
+    choice, rt1, rt2 = simulate_two_stage(model1, v1, v2)
+    Trial(v1, v2, choice, rt1, rt2)
 end
 
 average_rt1 = mean(trial.rt1 for trial in random_trial1)
