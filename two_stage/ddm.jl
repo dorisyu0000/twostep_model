@@ -89,7 +89,7 @@ end
 
 
 
-function simulate_two_stage(model::DDM, v1::Vector{Float64}, v2::Vector{Float64}; maxt=5000, logger=(dv, t) -> nothing)
+function simulate_two_stage(model::DDM, v1::Vector{Float64}, v2::Vector{Float64}; maxt=5000, logger=(dv, stage, t) -> nothing)
     N = length(v2)  # There are always 3/4 options in the two-stage decision model
     noise1 = Normal(0,0.1)
     noise2 = Normal(0,0.1)
@@ -106,6 +106,7 @@ function simulate_two_stage(model::DDM, v1::Vector{Float64}, v2::Vector{Float64}
     # dv_stage1 = zeros(N)
     dv = zeros(N)
     for t in 1:maxt
+        logger(copy(dv), 1, t)
         for i in 1:N
             dv[i] += stage1_drifts[i] + rand(noise1)
         end
@@ -135,6 +136,7 @@ function simulate_two_stage(model::DDM, v1::Vector{Float64}, v2::Vector{Float64}
 
     # Otherwise, possibly change decision
     for t in 1:(maxt-rt1)
+        logger(copy(dv), 2, t)
         # Stage 1: Decide between L and R
         for i in indices
             dv[i] += stage2_drifts[i] + rand(noise2)  # Continue accumulating evidence for the second decision
