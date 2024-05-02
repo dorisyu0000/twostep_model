@@ -87,6 +87,15 @@ function value_function(v1::Vector{Float64}, v2::Vector{Float64}, weight=1.0)
     return v, expanded_v1, v2
 end
 
+function apply_inhibition!(model::DDM, dv, dv_alt)
+    copy!(dv_alt, dv)
+    for i in eachindex(dv)
+        for j in eachindex(dv)
+            i == j && continue  # skip self
+            dv[j] -= model.inhibition * dv_alt[i]
+        end
+    end
+end
 
 
 function simulate_two_stage(model::DDM, v1::Vector{Float64}, v2::Vector{Float64}; maxt=5000, logger=(dv, stage, t) -> nothing)
@@ -98,18 +107,21 @@ function simulate_two_stage(model::DDM, v1::Vector{Float64}, v2::Vector{Float64}
     v,v1,v2 = value_function(v1, v2)
     stage1_drifts = model.d1 .* v
     stage2_drifts = model.d2 .* v2 
-    
+
+
     rt1, rt2 = 0, 0
     choice1, choice2 = 0, 0
 
     # Stage 1: Decide between L and R
     # dv_stage1 = zeros(N)
     dv = zeros(N)
+    dv_alt = zeros(N)
     for t in 1:maxt
         logger(copy(dv), 1, t)
         for i in 1:N
             dv[i] += stage1_drifts[i] + rand(noise1)
         end
+        apply_inhibition!(model, dv, dv_alt)
         choice1 = final_termination(dv, model.threshold1)
         if choice1 != 0
             rt1 = t + t1_error
@@ -141,6 +153,7 @@ function simulate_two_stage(model::DDM, v1::Vector{Float64}, v2::Vector{Float64}
         for i in indices
             dv[i] += stage2_drifts[i] + rand(noise2)  # Continue accumulating evidence for the second decision
         end
+        apply_inhibition!(model, @view(dv[indices]), dv_alt)
         choice = final_termination(@view(dv[indices]), model.threshold2)  # Pass the relevant evidence to final_termination
 
         if choice != 0
