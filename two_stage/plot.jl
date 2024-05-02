@@ -46,8 +46,8 @@ trials1 = load_trials("/Users/dorisyu/Documents/GitHub/fitting_example/trials1.j
 trials2 = load_trials("/Users/dorisyu/Documents/GitHub/fitting_example/trials2.json")
 
 # Define the DDM model parameters
-parameters1 = [ 0.005001713335601045, 0.0504784811224757, 1.0, 1.5, 10, 10]
-
+parameters1 = [0.005047848112247565, 0.008870085305771531, 0.5, 1.0998, 14.0, 4.007]
+parameters2 = [0.0046764985540873605, 0.009999999999658402, 0.5478767192200233, 0.9000000000005152, 10.0, 8.39574789114749]
 # parameters2 = [0.04335455108562024, 0.0885242554918941, 0.3969524656211612, 0.3358071042959825, 0.9960389831987981, 1.0047869628386545, 0.21312658886546265]
 model1 = DDM(parameters1...)
 model2 = DDM(parameters2...)
@@ -61,14 +61,6 @@ function simulate_two_stage(model, v1, v2)
     return choice, rt1, rt2
 end
 
-function calculate_difficulty(trials)
-    difficulty = 0
-    for trial in trials
-        difficulty += sum(trial.value1) + sum(trial.value2)
-    end
-    return difficulty
-end
-
 
 random_trial1 = map(trials1) do trial
     v1 = trial.value1
@@ -77,15 +69,23 @@ random_trial1 = map(trials1) do trial
     Trial(v1, v2, choice, rt1, rt2)
 end
 
+average_rt1 = mean(trial.rt1 for trial in trials1)
+average_rt2 = mean(trial.rt2 for trial in trials1)
+
 average_rt1 = mean(trial.rt1 for trial in random_trial1)
 average_rt2 = mean(trial.rt2 for trial in random_trial1)
 
 random_trial2 = map(trials2) do trial
     v1 = trial.value1
     v2 = trial.value2
-    choice1, choice2, rt1, rt2 = simulate_two_stage(model1, v1, v2)
-    Trial(v1, v2, choice1, choice2, rt1, rt2)
+    choice, rt1, rt2 = simulate_two_stage(model2, v1, v2)
+    Trial(v1, v2, choice, rt1, rt2)
 end
+
+average_rt1 = mean(trial.rt1 for trial in trials2)
+average_rt2 = mean(trial.rt2 for trial in trials2)
+average_rt2 = mean([trial.rt2 for trial in trials2 if trial.choice == 1 || trial.choice == 2])
 
 average_rt1 = mean(trial.rt1 for trial in random_trial2)
 average_rt2 = mean(trial.rt2 for trial in random_trial2)
+average_rt2 = mean([trial.rt2 for trial in random_trial2 if trial.choice == 1 || trial.choice == 2])

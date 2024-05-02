@@ -38,7 +38,7 @@ using Distributed
     
     function LapseModel(trials::Vector{Trial})
         N = maximum(length(trial.value2) for trial in trials)  # Maximum number of paths
-        max_rt = maximum(trial.rt1 + trial.rt2 for trial in trials)
+        max_rt = maximum((trial.rt1) + maximum(trial.rt2) for trial in trials)
         min_rt1 = minimum(trial.rt1 for trial in trials)
         min_rt2 = minimum(trial.rt2 for trial in trials)
         return LapseModel(N, max_rt, min_rt1, min_rt2)
@@ -64,7 +64,7 @@ using Distributed
         return logp
     end
     
-    function log_likelihood(model::DDM, trials::Vector{Trial}; parallel=false, ε=.1, rt_tol=5, kws...)
+    function log_likelihood(model::DDM, trials::Vector{Trial}; parallel=false, ε=.05, rt_tol=5, kws...)
         lapse = LapseModel(trials)
         min_logp = log_likelihood(lapse, trials; rt_tol)
         (logp, std) = ibs(trials; parallel, min_logp, kws...) do t
@@ -105,7 +105,7 @@ function load_trials(filename::String)
     return trials
 end
 
-trials = load_trials("/Users/dorisyu/Documents/GitHub/fitting_example/trials1.json")
+trials = load_trials("/Users/dorisyu/Documents/GitHub/fitting_example/trials2.json")
 
 trials = trials[1:min(20, length(trials))] # Only use the first 10 trials for now
 # %% --------
@@ -159,8 +159,9 @@ box = Box(
     :threshold1 => (0.8, 1.2),
     :threshold2 => (1.2, 1.8),
 )
-lower_bounds = [0.000001, 0.00001, 0.2, 0.8,10,5]  # Corresponding to the lower bounds of d1, d2, threshold1, threshold2, t1_error, t2_error
-upper_bounds = [0.005, 0.005, 0.8, 1.2,30,10]    # Corresponding to the upper bounds
+
+lower_bounds = [0.00-01, 0.00001, 0.5, 0.9,10,4]  # Corresponding to the lower bounds of d1, d2, threshold1, threshold2, t1_error, t2_error
+upper_bounds = [0.01, 0.01, 0.9, 1.2,20,11]    # Corresponding to the upper bounds
 
 bads = optimize_bads(lower_bounds=lower_bounds, upper_bounds=upper_bounds, specify_target_noise=true, tol_fun=5, max_fun_evals=1000) do params
     # Extract parameters from the vector
