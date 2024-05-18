@@ -12,6 +12,7 @@ using Distributed
     using Serialization
 
     struct Trial
+        rewards::Vector{Float64}
         value1::Vector{Float64}  # Rewards for each path: [R, L]
         value2::Vector{Float64}  # Rewards for each path: [R_LL, R_LR, R_RL, R_RR]
         choice1::Int  # Decision at stage 1: 0 for no decision, 1 for left, 2 for right
@@ -46,11 +47,11 @@ trials1 = load_trials("/Users/dorisyu/Documents/GitHub/fitting_example/trials1.j
 trials2 = load_trials("/Users/dorisyu/Documents/GitHub/fitting_example/trials2.json")
 
 # Define the DDM model parameters
-parameters1 = [0.005047848112247565, 0.008870085305771531, 0.5, 1.0998, 14.0, 4.007]
-parameters2 = [0.0046764985540873605, 0.009999999999658402, 0.5478767192200233, 0.9000000000005152, 10.0, 8.39574789114749]
+parameters1 = [0.004659494247718415, 0.0030975827291885197, 0.49688125, 0.9001999999999999, 12.5, 8.0]
+# parameters2 = [0.0046764985540873605, 0.009999999999658402, 0.5478767192200233, 0.9000000000005152, 10.0, 8.39574789114749]
 # parameters2 = [0.04335455108562024, 0.0885242554918941, 0.3969524656211612, 0.3358071042959825, 0.9960389831987981, 1.0047869628386545, 0.21312658886546265]
 model1 = DDM(parameters1...)
-model2 = DDM(parameters2...)
+# model2 = DDM(parameters2...)
 
 # Assuming the existence of a function `simulate_two_stage` which does the actual simulation
 # for the two-stage decision process. You will need to define this function based on your model.
@@ -60,6 +61,9 @@ function simulate_two_stage(model, v1, v2)
     choice, rt1, rt2 = simulate_two_stage(model, v1,v2)
     return choice, rt1, rt2
 end
+
+function calculate_diff(trials)
+    rewards = trial.rewards
 
 
 random_trial1 = map(trials1) do trial

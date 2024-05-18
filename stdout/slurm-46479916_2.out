@@ -1,0 +1,38 @@
+  4.117581 seconds (458.11 k allocations: 33.076 MiB, 5.46% compilation time)
+bads:TooCloseBounds: For each variable, hard and plausible bounds should not be too close. Moving plausible bounds.
+Variables (index) internally transformed to log coordinates: [[0 0]
+ [0 1]]
+Beginning optimization of a STOCHASTIC objective function (specified noise)
+
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method              Actions
+     0           1         13674.8         65.9831               1                                  
+     0          33         13674.8         65.9831               1          Initial mesh            Initial points
+     0          34         13287.5         9.51912               1        Successful poll           Train
+     1          47         13267.9         9.47265               1        Successful poll           Train
+     2          61         13265.7         9.32999             0.5          Refine grid             Train
+     3          73         13236.7         9.22177               1        Successful poll           Train
+     4          87         13257.6          9.0956             0.5          Refine grid             Train
+     5         102         13258.1         9.21199            0.25          Refine grid             Train
+     6         112         13183.1           9.353             0.5        Successful poll           Train
+     7         125         13133.9         9.30931               1        Successful poll           Train
+     8         138         13032.6         9.29283               1        Successful poll           Train
+     9         153         13032.7         9.39744             0.5          Refine grid             Train
+    10         168         13129.2         42.6308           0.125          Refine grid             Train
+    11         185         13081.1         54.4936          0.0625          Refine grid             Train
+    12         202         12970.8         64.4742           0.125        Successful poll           Train
+    13         219         12971.6         64.4735          0.0625          Refine grid             Train
+    14         221         13100.9          22.237          0.0625      Successful search (ES-ell)        
+    14         243         13100.9          22.237         0.03125          Refine grid             
+    15         261         13133.6         24.2566       0.0078125          Refine grid             Train
+    16         279         13071.5         13.2585      0.00390625          Refine grid             Train
+    17         297         13073.9         13.2312      0.00195312          Refine grid             Train
+    18         315           13067         10.6776     0.000976562          Refine grid             Train
+    19         333         13099.4         15.8161     0.000488281          Refine grid             Train
+    20         351         13126.1         21.2196     0.000244141          Refine grid             Train
+    21         369         13143.6         20.7103      0.00012207          Refine grid             Train
+    22         387         13179.1         36.8922     6.10352e-05          Refine grid             Train
+    23         405         13242.4         17.9252     3.05176e-05          Refine grid             Train
+Optimization terminated: change in the function value less than options['tol_fun'].
+Estimated function value at minimum: 13066.540357042866 ± 24.330100373138077 (mean ± SEM from 10 samples)
+True Model: DDM(0.005394611503803686, 0.003649338310031976, 0.6000000000000001, 1.0501, 10.007000000000001, 9.0)
+True Log Likelihood: (-13175.156755184636, 65.28223151779406)

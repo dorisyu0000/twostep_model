@@ -5,7 +5,7 @@ using Distributed
 
 @time @everywhere begin
 
-    include("ddm.jl")
+    include("ddm_average.jl")
     include("box.jl")
     include("ibs.jl")
 
@@ -64,10 +64,10 @@ using Distributed
         return logp
     end
     
-    function log_likelihood(model::DDM, trials::Vector{Trial}; parallel=false, ε=.05, rt_tol=5, kws...)
+    function log_likelihood(model::DDM, trials::Vector{Trial}; parallel=false, ε=.1, rt_tol=5, kws...)
         lapse = LapseModel(trials)
         min_logp = log_likelihood(lapse, trials; rt_tol)
-        (logp, std) = ibs(trials; parallel, min_logp, kws...) do t
+        (logp, std) = parallel_ibs(trials; parallel, min_logp, kws...) do t
             if rand() < ε
                 choice, rt1, rt2 = simulate_two_stage_lapse(lapse)
             else
@@ -105,51 +105,26 @@ function load_trials(filename::String)
     return trials
 end
 
-trials = load_trials("/Users/dorisyu/Documents/GitHub/fitting_example/trials2.json")
+trials = load_trials("/home/my2689/.ssh/fitting_example/AllTrial.json")
 
 trials = trials[1:min(20, length(trials))] # Only use the first 10 trials for now
 # %% --------
 # model fitting 
 
-box = Box(
-    :d1 => (.001, .1),
-    :d2 => (.01, .1),
-    :threshold1 => (0.4, 0.8),
-    :threshold2 => (0.8, 1.2),
-    :t1_error => (1, 3),
-    :t2_error => (1, 2),
-)
+# box = Box(
+#     :d1 => (.001, .1),
+#     :d2 => (.01, .1),
+#     :threshold1 => (0.4, 0.8),
+#     :threshold2 => (0.8, 1.2),
+#     :t1_error => (1, 3),
+#     :t2_error => (1, 2),
+# )
 
-params = grid(5, box)
+# params = grid(5, box)
 
-like_grid = @showprogress pmap(params) do prm
-    log_likelihood(DDM(;prm...), trials; rt_tol=10, repeats=3)
-end
-
-
-
-# %% --------
-# Generate some random trials
-Random.seed!(1)
-
-function generate_random_floats(n, min_val, max_val)
-    return [float(rand(min_val:max_val)) for _ in 1:n]
-end
-
-parameters = [0.0001, 0.001, 0.7, 0.9, 30,5]
-model = DDM(parameters...)
-
-v1 = generate_random_floats(2, -4, 4)
-v2 = generate_random_floats(4, -4, 4)
-random_trials = map(1:10) do i
-    choice, rt1, rt2 = simulate_two_stage(model, v1,v2)
-    trials = Trial(v1,v2, choice, rt1, rt2)
-end
-
-prm = (d1=.0001,d2=.001,threshold1=0.8, threshold2=1.0)
-
-log_likelihood(DDM(;prm...),trials; rt_tol=1, repeats=5)
-
+# like_grid = @showprogress pmap(params) do prm
+#     log_likelihood(DDM(;prm...), trials; rt_tol=10, repeats=3)
+# end
 
 # Bayesian Optimization
 include("bads.jl")
@@ -175,5 +150,31 @@ bads = optimize_bads(lower_bounds=lower_bounds, upper_bounds=upper_bounds, speci
 end
 
 d1, d2, threshold1, threshold2, t1_error, t2_error= get_result(bads)[:x]
+
 true_model = DDM(;d1, d2, threshold1, threshold2, t1_error, t2_error)
 true_logp = log_likelihood(true_model, trials)
+
+println(true_logp)
+println(true_model)
+
+# %% --------
+# Generate some random trials by using given parmeter
+# Random.seed!(1)
+
+# function generate_random_floats(n, min_val, max_val)
+#     return [float(rand(min_val:max_val)) for _ in 1:n]
+# end
+
+# parameters = [0.0001, 0.001, 0.7, 0.9, 30,5]
+# model = DDM(parameters...)
+
+# v1 = generate_random_floats(2, -4, 4)
+# v2 = generate_random_floats(4, -4, 4)
+# random_trials = map(1:10) do i
+#     choice, rt1, rt2 = simulate_two_stage(model, v1,v2)
+#     trials = Trial(v1,v2, choice, rt1, rt2)
+# end
+
+# prm = (d1=.0001,d2=.001,threshold1=0.8, threshold2=1.0)
+
+# log_likelihood(DDM(;prm...),trials; rt_tol=1, repeats=5)
