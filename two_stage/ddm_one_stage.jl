@@ -40,27 +40,6 @@ function final_termination(dv, threshold)
     end
 end
 
-function simulate(model::DDM, v::Vector{Float64}; maxt=100000, logger=(dv, t) -> nothing)
-    N = length(v)
-    noise = Normal(0, model.σ)
-    drift = model.d * v
-    dv = zeros(N)  # total accumulated evidence
-    choice = 0
-
-    for t in 1:maxt
-        logger(dv, t)
-        for i in 1:N
-            dv[i] += drift[i] + rand(noise)
-        end
-        choice = final_termination(dv, model.threshold)
-        if choice != 0
-            return (choice, t)
-        end
-    end
-    (0, -1)
-end
-
-
 
 function value_function(v1::Vector{Float64}, v2::Vector{Float64}, weight=1.0)
     v = Vector{Float64}(undef, length(v2))

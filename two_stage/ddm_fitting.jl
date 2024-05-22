@@ -95,8 +95,8 @@ function load_trials(filename::String)
                 Float64.(data["value1"]),
                 Float64.(data["value2"]),
                 data["choice2"],
-                Int(round(data["rt1"]/100 )),
-                Int(round(data["rt2"] /100))
+                Int(round(data["rt1"])),
+                Int(round(data["rt2"]))
 
             )
             push!(trials, trial)
@@ -135,7 +135,7 @@ box = Box(
     :threshold2 => (1.2, 1.8),
 )
 
-lower_bounds = [0.00-01, 0.00001, 0.5, 0.9,10,4]  # Corresponding to the lower bounds of d1, d2, threshold1, threshold2, t1_error, t2_error
+lower_bounds = [0.0001, 0.00001, 0.5, 0.9,10,4]  # Corresponding to the lower bounds of d1, d2, threshold1, threshold2, t1_error, t2_error
 upper_bounds = [0.01, 0.01, 0.9, 1.2,20,11]    # Corresponding to the upper bounds
 
 bads = optimize_bads(lower_bounds=lower_bounds, upper_bounds=upper_bounds, specify_target_noise=true, tol_fun=5, max_fun_evals=1000) do params

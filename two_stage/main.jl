@@ -14,6 +14,7 @@ using Distributed
     using Serialization
 
     struct Trial
+        rewards::Vector{Float64} # Rewards for each path: [R, L]
         value1::Vector{Float64}  # Rewards for each path: [R, L]
         value2::Vector{Float64}  # Rewards for each path: [R_LL, R_LR, R_RL, R_RR]
         choice::Int  # Decision at stage 2: 0 for no decision, 12 for LL, 22 for LR, 21 for RL,22 for RR
@@ -102,8 +103,8 @@ function load_trials(filename::String)
                 Float64.(data["value1"]),
                 Float64.(data["value2"]),
                 data["choice2"],
-                Int(round(data["rt1"]/100 )),
-                Int(round(data["rt2"]/100))
+                Int(round(data["rt1"])),
+                Int(round(data["rt2"]))
 
             )
             push!(trials, trial)
