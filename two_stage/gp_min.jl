@@ -1,4 +1,5 @@
-using BayesianOptimization, GaussianProcesses, Distributions
+using BayesianOptimization
+using GaussianProcesses, Distributions
 
 function gp_minimize(f::Function, d::Int; verbose=true, init_Xy=nothing, run=true,
                      iterations=400, repetitions=1, acquisition_restarts=50,

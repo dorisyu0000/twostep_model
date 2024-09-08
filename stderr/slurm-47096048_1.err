@@ -1,0 +1,29 @@
+ERROR: LoadError: DimensionMismatch: arrays could not be broadcast to a common size; got a dimension with lengths 6 and 5
+Stacktrace:
+  [1] _bcs1
+    @ ./broadcast.jl:555 [inlined]
+  [2] _bcs
+    @ ./broadcast.jl:549 [inlined]
+  [3] broadcast_shape
+    @ ./broadcast.jl:543 [inlined]
+  [4] combine_axes
+    @ ./broadcast.jl:524 [inlined]
+  [5] _axes
+    @ ./broadcast.jl:236 [inlined]
+  [6] axes
+    @ ./broadcast.jl:234 [inlined]
+  [7] combine_axes
+    @ ./broadcast.jl:524 [inlined]
+  [8] instantiate
+    @ ./broadcast.jl:306 [inlined]
+  [9] materialize
+    @ ./broadcast.jl:903 [inlined]
+ [10] BadsConfig(; x0::Missing, lower_bounds::Vector{Any}, upper_bounds::Vector{Any}, plausible_lower_bounds::Missing, plausible_upper_bounds::Missing, options::@Kwargs{specify_target_noise::Bool, tol_fun::Int64, max_fun_evals::Int64})
+    @ Main ~/.ssh/fitting_example/two_stage/bads.jl:21
+ [11] BadsConfig
+    @ ~/.ssh/fitting_example/two_stage/bads.jl:16 [inlined]
+ [12] #optimize_bads#65
+    @ ~/.ssh/fitting_example/two_stage/bads.jl:126 [inlined]
+ [13] top-level scope
+    @ ~/.ssh/fitting_example/two_stage/main.jl:141
+in expression starting at /home/my2689/.ssh/fitting_example/two_stage/main.jl:141

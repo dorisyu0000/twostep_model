@@ -1,0 +1,2 @@
+  2.024724 seconds (649.09 k allocations: 45.613 MiB, 0.81% gc time, 21.86% compilation time)
+bads:TooCloseBounds: For each variable, hard and plausible bounds should not be too close. Moving plausible bounds.

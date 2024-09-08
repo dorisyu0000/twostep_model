@@ -1,0 +1,36 @@
+  2.337834 seconds (625.64 k allocations: 43.679 MiB, 0.36% gc time, 17.02% compilation time)
+bads:TooCloseBounds: For each variable, hard and plausible bounds should not be too close. Moving plausible bounds.
+Beginning optimization of a STOCHASTIC objective function (specified noise)
+
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method              Actions
+     0           1         6421.38         43.5489               1                                  
+     0          33         6421.38         43.5489               1          Initial mesh            Initial points
+     0          34         6126.84         8.11101               1        Successful poll           Train
+     1          51         6126.84         8.11101             0.5          Refine grid             Train
+     2          58         6113.27         8.13868               1        Successful poll           Train
+     3          74         6113.27         8.13868             0.5          Refine grid             Train
+     4          86         6204.21         8.38535               1        Successful poll           Train
+     5         101         6127.07         8.32287             0.5          Refine grid             Train
+     6         118         6127.24         8.44044            0.25          Refine grid             Train
+     7         135         6127.71         8.49529           0.125          Refine grid             Train
+     8         152         6204.69           5.508         0.03125          Refine grid             Train
+     9         164         6178.57          41.088          0.0625        Successful poll           Train
+    10         176         6150.16         40.9958           0.125        Successful poll           Train
+    11         187         6090.32         41.1003            0.25        Successful poll           Train
+    12         204         6090.32         41.1003           0.125          Refine grid             Train
+    13         209         6193.54         28.3231           0.125      Successful search (ES-ell)        
+    13         227         6193.54         28.3231          0.0625          Refine grid             Train
+    14         245         6212.68         9.50407         0.03125          Refine grid             Train
+    15         263         6217.64         9.40922        0.015625          Refine grid             Train
+    16         281         6201.92         7.71477       0.0078125          Refine grid             Train
+    17         299         6201.91         7.71477      0.00390625          Refine grid             Train
+    18         307         6179.06         14.6715       0.0078125        Successful poll           Train
+    19         325         6179.08          14.671      0.00390625          Refine grid             Train
+    20         343         6239.28         7.94298      0.00195312          Refine grid             Train
+    21         361         6242.47         7.87266     0.000976562          Refine grid             Train
+    22         369         6164.97         14.8179      0.00195312        Successful poll           Train
+    23         387          6165.1         14.8109     0.000976562          Refine grid             Train
+    24         405         6239.11         8.95155     0.000488281          Refine grid             Train
+    25         423         6244.15         8.82219     0.000244141          Refine grid             Train
+    26         441         6253.74         23.2965      0.00012207          Refine grid             Train
+    27         459          6161.8         25.1796     6.10352e-05          Refine grid             Train

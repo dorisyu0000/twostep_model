@@ -1,0 +1,35 @@
+Traceback (most recent call last):
+  File "/home/my2689/.ssh/fitting_example/bads.py", line 39, in <module>
+    result = bads.optimize()
+  File "/scratch/my2689/rl/lib/python3.9/site-packages/pybads/bads/bads.py", line 1239, in optimize
+    ) = self._search_step_(gp)
+  File "/scratch/my2689/rl/lib/python3.9/site-packages/pybads/bads/bads.py", line 1554, in _search_step_
+    gp, gp_exit_flag = local_gp_fitting(
+  File "/scratch/my2689/rl/lib/python3.9/site-packages/pybads/bads/gaussian_process_train.py", line 402, in local_gp_fitting
+    gp, hyp_gp, res, exit_flag = _robust_gp_fit_(
+  File "/scratch/my2689/rl/lib/python3.9/site-packages/pybads/bads/gaussian_process_train.py", line 542, in _robust_gp_fit_
+    new_hyp, _, res = tmp_gp.fit(
+  File "/scratch/my2689/rl/lib/python3.9/site-packages/gpyreg/gaussian_process.py", line 1008, in fit
+    X, y, s2 = self._convert_shapes(X, y, s2)
+  File "/scratch/my2689/rl/lib/python3.9/site-packages/gpyreg/gaussian_process.py", line 2555, in _convert_shapes
+    s2 = s2.reshape(N, 1)
+ValueError: cannot reshape array of size 200 into shape (189,1)
+ERROR: LoadError: Exception raised in pybads. See error message above.
+Stacktrace:
+ [1] error(s::String)
+   @ Base ./error.jl:35
+ [2] get_next_request!(bp::BadsProcess)
+   @ Main ~/.ssh/fitting_example/two_stage/bads.jl:55
+ [3] ask(bads::BADS)
+   @ Main ~/.ssh/fitting_example/two_stage/bads.jl:80
+ [4] tell(bads::BADS, y::Tuple{Float64, Float64})
+   @ Main ~/.ssh/fitting_example/two_stage/bads.jl:104
+ [5] optimize_bads(f::var"#62#63", bads::BADS)
+   @ Main ~/.ssh/fitting_example/two_stage/bads.jl:121
+ [6] optimize_bads(f::Function, config::BadsConfig)
+   @ Main ~/.ssh/fitting_example/two_stage/bads.jl:125
+ [7] #optimize_bads#59
+   @ ~/.ssh/fitting_example/two_stage/bads.jl:126 [inlined]
+ [8] top-level scope
+   @ ~/.ssh/fitting_example/two_stage/main.jl:124
+in expression starting at /home/my2689/.ssh/fitting_example/two_stage/main.jl:124

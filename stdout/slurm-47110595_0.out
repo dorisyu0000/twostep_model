@@ -1,0 +1,52 @@
+  2.106678 seconds (647.80 k allocations: 45.493 MiB, 0.76% gc time, 23.12% compilation time)
+bads:TooCloseBounds: For each variable, hard and plausible bounds should not be too close. Moving plausible bounds.
+Beginning optimization of a STOCHASTIC objective function (specified noise)
+
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method              Actions
+     0           1         32251.8         96.5203               1                                  
+     0          33         30365.2         96.5203               1          Initial mesh            Initial points
+     0          41         30365.2         96.3855             0.5          Refine grid             Train
+     1          43         30324.8         10.9846             0.5      Successful search (ES-ell)        
+     1          47         30205.7         10.7984             0.5      Successful search (ES-ell)        
+     1          51         30169.7         10.9765             0.5      Successful search (ES-ell)        
+     1          52         30054.1         11.0038             0.5      Successful search (ES-ell)        
+     1          60         29966.1         10.7901             0.5      Successful search (ES-ell)        
+     1          64           29903         10.0691             0.5      Successful search (ES-wcm)        
+     1          84           29903         10.0691            0.25          Refine grid             
+     2          85         30039.3         47.7974            0.25      Successful search (ES-ell)        
+     2         114         30039.3         47.7974           0.125          Refine grid             Train
+     3         115         30091.5         24.9052           0.125      Successful search (ES-wcm)        
+     3         116         30056.4         39.0798           0.125      Successful search (ES-ell)        
+     3         144         30056.4         39.0798          0.0625          Refine grid             Train
+     4         145         30094.5         17.6287          0.0625      Successful search (ES-wcm)        
+     4         146         30085.1         19.5452          0.0625      Successful search (ES-ell)        
+     4         147         30074.9          32.463          0.0625      Successful search (ES-wcm)        
+     4         173         30074.9          32.463         0.03125          Refine grid             Train
+     5         174         30088.4         17.2957         0.03125      Successful search (ES-ell)        
+     5         175         30082.9         17.8823         0.03125      Successful search (ES-ell)        
+     5         176         30079.9         21.8106         0.03125      Incremental search (ES-wcm)        
+     5         202         30079.9         21.8106        0.015625          Refine grid             
+     6         203         30092.4         13.4612        0.015625      Incremental search (ES-ell)        
+     6         204         30092.2         14.8163        0.015625      Incremental search (ES-ell)        
+     6         206         30087.1         16.9351        0.015625      Successful search (ES-ell)        
+     6         232         30087.1         16.9351       0.0078125          Refine grid             Train
+     7         233         30092.2         15.3222       0.0078125      Incremental search (ES-ell)        
+     7         253         30092.2         15.3222      0.00195312          Refine grid             
+     8         254         30103.8         12.7655      0.00195312      Incremental search (ES-ell)        
+     8         275         30103.8         12.7655     0.000976562          Refine grid             Train
+     9         297         30102.7         16.5724     0.000488281          Refine grid             Train
+    10         298         30105.7         9.79622     0.000488281      Incremental search (ES-wcm)        
+    10         319         30105.7         9.79622      0.00012207          Refine grid             Train
+    11         341         30108.8         16.7447     6.10352e-05          Refine grid             Train
+    12         364         30110.9         25.7124     3.05176e-05          Refine grid             Train
+    13         365         30107.7         16.2902     3.05176e-05      Incremental search (ES-ell)        
+    13         385         30106.9         14.4193     1.52588e-05          Refine grid             
+    14         406         30114.9         10.7787     7.62939e-06          Refine grid             
+    15         428         30120.2          10.247     1.90735e-06          Refine grid             
+    16         451         30121.6            7.32     9.53674e-07          Refine grid             
+Optimization terminated: change in the function value less than options['tol_mesh']
+Estimated function value at minimum: 30101.41222359596 ± 31.138684318696573 (mean ± SEM from 10 samples)
+Any[0.005, 0.005, 0.3, 1.0, 1, 1, 0.01, 0.01]
+Any[0.01, 0.01, 0.9, 1.5, 9, 4, 0.05, 0.05]
+True Model: DDM(0.005000268347797682, 0.007741789153603604, 0.6308945534700527, 1.4999999999483116, 8.968546113168822, 3.435685029982822, 0.04278933861254715, 0.017462096243258566)
+True Log Likelihood: (-30308.129851009668, 96.46224890716097)

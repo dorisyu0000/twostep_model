@@ -1,10 +1,9 @@
 using Pkg
 using Distributed
 
-
 @time @everywhere begin
 
-    include("ddm_one_stage.jl")
+    include("ddm_average.jl")
     include("box.jl")
     include("ibs.jl")
 
@@ -14,14 +13,13 @@ using Distributed
     using Serialization
 
     struct Trial
-        rewards::Vector{Float64} # Rewards for each path: [R, L]
+        rewards::Vector{Float64}
         value1::Vector{Float64}  # Rewards for each path: [R, L]
         value2::Vector{Float64}  # Rewards for each path: [R_LL, R_LR, R_RL, R_RR]
         choice::Int  # Decision at stage 2: 0 for no decision, 12 for LL, 22 for LR, 21 for RL,22 for RR
         rt1::Float64  # Reaction time for the first decision
         rt2::Float64 # Reaction time for the second decision
     end
-
 
     function log_likelihood(model, trials::Vector{Trial}; kws...)
         mapreduce(+, trials) do trial
@@ -64,16 +62,16 @@ using Distributed
         return logp
     end
     
-    function log_likelihood(model::DDM, trials::Vector{Trial}; parallel=false, ε=.1, rt_tol=1, kws...)
+    function log_likelihood(model::DDM, trials::Vector{Trial}; parallel=false, ε=.01, rt_tol=5, kws...)
         lapse = LapseModel(trials)
         min_logp = log_likelihood(lapse, trials; rt_tol)
         (logp, std) = ibs(trials; parallel, min_logp, kws...) do t
             if rand() < ε
                 choice, rt1, rt2 = simulate_two_stage_lapse(lapse)
             else
-                choice, rt1, rt2 = simulate_two_stage(model, t.value1, t.value2; maxt = t.rt1 +t.rt2 + rt_tol + 1) 
+                choice, rt1, rt2 = simulate_two_stage(model, t.value1, t.value2; maxt = t.rt1 +t.rt2 + rt_tol + rt_tol + 1) 
             end
-            choice == t.choice && abs(rt1 - t.rt1) ≤ rt_tol && abs(rt2 - t.rt2) ≤ rt_tol
+            choice == t.choice && abs(rt1+ - t.rt1) ≤ rt_tol && abs(rt2 - t.rt2) ≤ rt_tol
         end
         if ismissing(std)
             std = 1.
@@ -100,12 +98,12 @@ function load_trials(filename::String)
         for line in eachline(file)
             data = JSON.parse(line)
             trial = Trial(
+                Float64.(data["rewards"]),
                 Float64.(data["value1"]),
                 Float64.(data["value2"]),
                 data["choice2"],
-                Int(round(data["rt1"])),
-                Int(round(data["rt2"]))
-
+                Int(round(data["rt1"]/100)),
+                Int(round(data["rt2"]/100))
             )
             push!(trials, trial)
         end
@@ -114,10 +112,32 @@ function load_trials(filename::String)
 end
 
 trials = load_trials("/home/my2689/.ssh/fitting_example/AllTrial.json")
-# Get bounds from environment variables
+# trials = trials[1:min(400, length(trials))] 
+
+# # Get bounds from environment variables
 lower_bounds = JSON.parse(ENV["LOWER_BOUNDS"])
 upper_bounds = JSON.parse(ENV["UPPER_BOUNDS"])
+# # lower_bounds = [0.001, 0.01, 0.3, 1.0,1,1,0.005,0.005]
+# # upper_bounds =[0.01, 0.05, 1.0, 1.5,15,50,0.3,0.3]
 
+# # Inhibitory DDM fitting
+# bads = optimize_bads(lower_bounds=lower_bounds, upper_bounds=upper_bounds, specify_target_noise=true, tol_fun=5, max_fun_evals=1000) do params
+#     # Extract parameters from the vector
+#     d1, d2, threshold1, threshold2, t1_error, t2_error,β,κ= params
+#     model = DDM_inhb(d1=d1, d2=d2, threshold1=threshold1, threshold2=threshold2, t1_error=t1_error, t2_error=t2_error,β = β,κ = κ)
+#     logp, std = log_likelihood(model, trials; repeats=1)
+#     if ismissing(std)
+#         std = 1.0  # Set a default std value if missing
+#     end
+#     (-logp, std)
+# end
+
+# d1, d2, threshold1, threshold2, t1_error, t2_error,β,κ= get_result(bads)[:x]
+# true_model = DDM_inhb(;d1, d2, threshold1, threshold2, t1_error, t2_error,β,κ)
+# true_logp = log_likelihood(true_model, trials)
+
+
+#Two stage DDM
 bads = optimize_bads(lower_bounds=lower_bounds, upper_bounds=upper_bounds, specify_target_noise=true, tol_fun=5, max_fun_evals=1000) do params
     # Extract parameters from the vector
     d1, d2, threshold1, threshold2, t1_error, t2_error= params
@@ -133,8 +153,12 @@ d1, d2, threshold1, threshold2, t1_error, t2_error= get_result(bads)[:x]
 true_model = DDM(;d1, d2, threshold1, threshold2, t1_error, t2_error)
 true_logp = log_likelihood(true_model, trials)
 
+
 # Print the outputs
 println(lower_bounds)
 println(upper_bounds)
 println("True Model: ", true_model)
 println("True Log Likelihood: ", true_logp)
+
+
+ 

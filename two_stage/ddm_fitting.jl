@@ -5,7 +5,7 @@ using Distributed
 
 @time @everywhere begin
 
-    include("ddm_average.jl")
+    include("ddm.jl")
     include("box.jl")
     include("ibs.jl")
 
@@ -64,14 +64,14 @@ using Distributed
         return logp
     end
     
-    function log_likelihood(model::DDM, trials::Vector{Trial}; parallel=false, ε=.1, rt_tol=5, kws...)
+    function log_likelihood(model::DDM, trials::Vector{Trial}; parallel=false, ε=.01, rt_tol=5, kws...)
         lapse = LapseModel(trials)
         min_logp = log_likelihood(lapse, trials; rt_tol)
-        (logp, std) = parallel_ibs(trials; parallel, min_logp, kws...) do t
+        (logp, std) = ibs(trials; parallel, min_logp, kws...) do t
             if rand() < ε
                 choice, rt1, rt2 = simulate_two_stage_lapse(lapse)
             else
-                choice, rt1, rt2 = simulate_two_stage(model, t.value1, t.value2; maxt = t.rt1 +t.rt2 + rt_tol + 1) 
+                choice, rt1, rt2 = simulate_two_stage(model, t.value1, t.value2; maxt = t.rt1 +t.rt2 +rt_tol  +rt_tol + 1) 
             end
             choice == t.choice && abs(rt1 - t.rt1) ≤ rt_tol && abs(rt2 - t.rt2) ≤ rt_tol
         end
@@ -95,8 +95,8 @@ function load_trials(filename::String)
                 Float64.(data["value1"]),
                 Float64.(data["value2"]),
                 data["choice2"],
-                Int(round(data["rt1"])),
-                Int(round(data["rt2"]))
+                Int(round(data["rt1"]/10)),
+                Int(round(data["rt2"]/10))
 
             )
             push!(trials, trial)
@@ -105,10 +105,11 @@ function load_trials(filename::String)
     return trials
 end
 
-trials = load_trials("/home/my2689/.ssh/fitting_example/AllTrial.json")
+trials = load_trials("AllTrial.json")
 
-trials = trials[1:min(20, length(trials))] # Only use the first 10 trials for now
-# %% --------
+# trials = trials[1:min(200, length(trials))] 
+# %% --------m.
+
 # model fitting 
 
 # box = Box(
@@ -127,35 +128,35 @@ trials = trials[1:min(20, length(trials))] # Only use the first 10 trials for no
 # end
 
 # Bayesian Optimization
-include("bads.jl")
-box = Box(
-    :d1 => (.0001, .005),
-    :d2 => (.0001, .01),
-    :threshold1 => (0.8, 1.2),
-    :threshold2 => (1.2, 1.8),
-)
+# include("bads.jl")
+# box = Box(
+#     :d1 => (.0001, .005),
+#     :d2 => (.0001, .01),
+#     :threshold1 => (0.8, 1.2),
+#     :threshold2 => (1.2, 1.8),
+# )
 
-lower_bounds = [0.0001, 0.00001, 0.5, 0.9,10,4]  # Corresponding to the lower bounds of d1, d2, threshold1, threshold2, t1_error, t2_error
-upper_bounds = [0.01, 0.01, 0.9, 1.2,20,11]    # Corresponding to the upper bounds
+# lower_bounds = [0.0000001, 0.0000001, 1, 1.8,30,15]  # Corresponding to the lower bounds of d1, d2, threshold1, threshold2, t1_error, t2_error
+# upper_bounds = [0.00001, 0.00001, 1.8, 2.5,50,30]    # Corresponding to the upper bounds
 
-bads = optimize_bads(lower_bounds=lower_bounds, upper_bounds=upper_bounds, specify_target_noise=true, tol_fun=5, max_fun_evals=1000) do params
-    # Extract parameters from the vector
-    d1, d2, threshold1, threshold2, t1_error, t2_error= params
-    model = DDM(d1=d1, d2=d2, threshold1=threshold1, threshold2=threshold2, t1_error=t1_error, t2_error=t2_error)
-    logp, std = log_likelihood(model, trials; repeats=1)
-    if ismissing(std)
-        std = 1.0  # Set a default std value if missing
-    end
-    (-logp, std)
-end
+# bads = optimize_bads(lower_bounds=lower_bounds, upper_bounds=upper_bounds, specify_target_noise=true, tol_fun=5, max_fun_evals=1000) do params
+#     # Extract parameters from the vector
+#     d1, d2, threshold1, threshold2, t1_error, t2_error= params
+#     model = DDM(d1=d1, d2=d2, threshold1=threshold1, threshold2=threshold2, t1_error=t1_error, t2_error=t2_error)
+#     logp, std = log_likelihood(model, trials; repeats=1)
+#     if ismissing(std)
+#         std = 1.0  # Set a default std value if missing
+#     end
+#     (-logp, std)
+# end
 
-d1, d2, threshold1, threshold2, t1_error, t2_error= get_result(bads)[:x]
-
+# d1, d2, threshold1, threshold2, t1_error, t2_error= get_result(bads)[:x]
+d1, d2, threshold1, threshold2, t1_error, t2_error= [9.991000000000001e-5, 1.6347947822679198e-6, 0.46989218749999995, 1.0005, 10.0, 3.0]
 true_model = DDM(;d1, d2, threshold1, threshold2, t1_error, t2_error)
 true_logp = log_likelihood(true_model, trials)
 
-println(true_logp)
-println(true_model)
+# println(true_logp)
+# println(true_model)
 
 # %% --------
 # Generate some random trials by using given parmeter

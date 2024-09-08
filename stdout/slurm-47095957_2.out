@@ -1,0 +1,6 @@
+  2.636498 seconds (649.09 k allocations: 45.613 MiB, 1.10% gc time, 15.83% compilation time)
+bads:TooCloseBounds: For each variable, hard and plausible bounds should not be too close. Moving plausible bounds.
+Variables (index) internally transformed to log coordinates: [[0 4]
+ [0 5]
+ [0 6]
+ [0 7]]

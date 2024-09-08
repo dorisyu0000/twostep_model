@@ -1,0 +1,15 @@
+ERROR: LoadError: MethodError: no method matching *(::Int64, ::Tuple{Float64, Float64})
+
+Closest candidates are:
+  *(::Any, ::Any, !Matched::Any, !Matched::Any...)
+   @ Base operators.jl:587
+  *(::Real, !Matched::Complex{Bool})
+   @ Base complex.jl:327
+  *(!Matched::ChainRulesCore.NotImplemented, ::Any)
+   @ ChainRulesCore /scratch/my2689/.julia/packages/ChainRulesCore/zgT0R/src/tangent_arithmetic.jl:37
+  ...
+
+Stacktrace:
+ [1] top-level scope
+   @ ~/.ssh/fitting_example/two_stage/main.jl:156
+in expression starting at /home/my2689/.ssh/fitting_example/two_stage/main.jl:156

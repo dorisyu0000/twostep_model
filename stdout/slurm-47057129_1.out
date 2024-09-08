@@ -1,0 +1,14 @@
+  5.625297 seconds (625.64 k allocations: 43.679 MiB, 0.15% gc time, 7.00% compilation time)
+bads:TooCloseBounds: For each variable, hard and plausible bounds should not be too close. Moving plausible bounds.
+Beginning optimization of a STOCHASTIC objective function (specified noise)
+
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method              Actions
+     0           1         6116.76         43.6362               1                                  
+     0          33         6116.76         43.6362               1          Initial mesh            Initial points
+     0          41         6047.07         8.28728               1        Successful poll           Train
+     1          58         6047.07         8.28728             0.5          Refine grid             Train
+     2          75         6206.27         39.2824            0.25          Refine grid             Train
+     3          77         6183.42         36.7646            0.25      Successful search (ES-wcm)        
+     3          98         6183.42         36.7646           0.125          Refine grid             
+     4         116         6242.36         29.5866         0.03125          Refine grid             Train
+     5         134         6247.07         23.4547        0.015625          Refine grid             Train

@@ -1,0 +1,38 @@
+The latest version of Julia in the `release` channel is 1.10.3+0.x64.linux.gnu. You currently have `1.10.2+0.x64.linux.gnu` installed. Run:
+
+  juliaup update
+
+in your terminal shell to install Julia 1.10.3+0.x64.linux.gnu and update the `release` channel to that version.
+Traceback (most recent call last):
+  File "/home/my2689/.ssh/fitting_example/bads.py", line 39, in <module>
+    result = bads.optimize()
+  File "/scratch/my2689/rl/lib/python3.10/site-packages/pybads/bads/bads.py", line 1284, in optimize
+    self._poll_step_(gp)
+  File "/scratch/my2689/rl/lib/python3.10/site-packages/pybads/bads/bads.py", line 1993, in _poll_step_
+    gp, gp_exit_flag = local_gp_fitting(
+  File "/scratch/my2689/rl/lib/python3.10/site-packages/pybads/bads/gaussian_process_train.py", line 402, in local_gp_fitting
+    gp, hyp_gp, res, exit_flag = _robust_gp_fit_(
+  File "/scratch/my2689/rl/lib/python3.10/site-packages/pybads/bads/gaussian_process_train.py", line 542, in _robust_gp_fit_
+    new_hyp, _, res = tmp_gp.fit(
+  File "/scratch/my2689/rl/lib/python3.10/site-packages/gpyreg/gaussian_process.py", line 1008, in fit
+    X, y, s2 = self._convert_shapes(X, y, s2)
+  File "/scratch/my2689/rl/lib/python3.10/site-packages/gpyreg/gaussian_process.py", line 2555, in _convert_shapes
+    s2 = s2.reshape(N, 1)
+ValueError: cannot reshape array of size 200 into shape (189,1)
+ERROR: LoadError: Exception raised in pybads. See error message above.
+Stacktrace:
+ [1] get_next_request!(bp::BadsProcess)
+   @ Main ~/.ssh/fitting_example/two_stage/bads.jl:55
+ [2] ask(bads::BADS)
+   @ Main ~/.ssh/fitting_example/two_stage/bads.jl:80
+ [3] tell(bads::BADS, y::Tuple{Float64, Float64})
+   @ Main ~/.ssh/fitting_example/two_stage/bads.jl:104
+ [4] optimize_bads(f::var"#73#74", bads::BADS)
+   @ Main ~/.ssh/fitting_example/two_stage/bads.jl:121
+ [5] optimize_bads(f::Function, config::BadsConfig)
+   @ Main ~/.ssh/fitting_example/two_stage/bads.jl:125
+ [6] #optimize_bads#70
+   @ ~/.ssh/fitting_example/two_stage/bads.jl:126 [inlined]
+ [7] top-level scope
+   @ ~/.ssh/fitting_example/two_stage/main.jl:121
+in expression starting at /home/my2689/.ssh/fitting_example/two_stage/main.jl:121

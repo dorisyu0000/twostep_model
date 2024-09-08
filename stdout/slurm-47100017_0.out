@@ -1,0 +1,60 @@
+  5.135123 seconds (650.66 k allocations: 45.695 MiB, 0.27% gc time, 8.95% compilation time)
+bads:TooCloseBounds: For each variable, hard and plausible bounds should not be too close. Moving plausible bounds.
+Beginning optimization of a STOCHASTIC objective function (specified noise)
+
+ Iteration    f-count      E[f(x)]        SD[f(x)]           MeshScale          Method              Actions
+     0           1         34061.1         96.2895               1                                  
+     0          33         32635.9         96.2895               1          Initial mesh            Initial points
+     0          39         32635.9          96.052             0.5          Refine grid             Train
+     1          41         32307.4          10.991             0.5      Successful search (ES-wcm)        
+     1          42         32179.3         11.0208             0.5      Successful search (ES-wcm)        
+     1          43         31903.4         11.0072             0.5      Successful search (ES-wcm)        
+     1          44           31748         11.0114             0.5      Successful search (ES-wcm)        
+     1          49           31719         10.8932             0.5      Successful search (ES-wcm)        
+     1          53         31704.9         10.7184             0.5      Successful search (ES-ell)        
+     1          57         31627.1         9.20668             0.5      Successful search (ES-ell)        
+     1          72         31627.1         9.20668            0.25          Refine grid             
+     2          87         31665.2         13.0951           0.125          Refine grid             Train
+     3          88         31673.1         28.9924           0.125      Successful search (ES-wcm)        
+     3          89         31667.1         45.9187           0.125      Successful search (ES-ell)        
+     3          91         31636.6         42.7378           0.125      Successful search (ES-ell)        
+     3         110         31636.6         42.7378          0.0625          Refine grid             Train
+     4         111         31674.2         18.9162          0.0625      Successful search (ES-wcm)        
+     4         113         31671.5         19.7294          0.0625      Incremental search (ES-wcm)        
+     4         133         31671.5         19.7294         0.03125          Refine grid             Train
+     5         150         31690.7         21.3468       0.0078125          Refine grid             Train
+     6         151         31697.7         19.4209       0.0078125      Incremental search (ES-wcm)        
+     6         152           31694          19.551       0.0078125      Incremental search (ES-wcm)        
+     6         153         31690.9         22.0851       0.0078125      Incremental search (ES-wcm)        
+     6         166         31690.9         22.0851      0.00390625          Refine grid             Train
+     7         182         31708.4         15.9334     0.000976562          Refine grid             Train
+     8         198         31710.7         16.5847     0.000244141          Refine grid             Train
+     9         215         31711.7         15.6864      0.00012207          Refine grid             Train
+    10         232         31713.1         12.4551     6.10352e-05          Refine grid             Train
+    11         249         31710.2         12.9971     3.05176e-05          Refine grid             Train
+    12         250         31714.8         16.9015     3.05176e-05      Incremental search (ES-wcm)        
+    12         251         31706.7         16.6374     3.05176e-05      Successful search (ES-wcm)        
+    12         252           31706         12.3972     3.05176e-05      Incremental search (ES-wcm)        
+    12         253         31704.4         12.6592     3.05176e-05      Incremental search (ES-wcm)        
+    12         254         31703.4         12.5814     3.05176e-05      Incremental search (ES-wcm)        
+    12         257         31703.3         12.2278     3.05176e-05      Incremental search (ES-ell)        
+    12         258         31703.1          12.142     3.05176e-05      Incremental search (ES-ell)        
+    12         259         31700.5         12.1459     3.05176e-05      Incremental search (ES-ell)        
+    12         260         31698.5         12.0382     3.05176e-05      Incremental search (ES-wcm)        
+    12         261         31695.6         11.9947     3.05176e-05      Incremental search (ES-wcm)        
+    12         272         31686.4         11.4599     6.10352e-05        Successful poll           
+    13         273         31688.1          11.368     6.10352e-05      Incremental search (ES-wcm)        
+    13         274         31686.7         11.3894     6.10352e-05      Incremental search (ES-wcm)        
+    13         275         31682.8         11.4558     6.10352e-05      Incremental search (ES-wcm)        
+    13         289         31682.8         11.4558     3.05176e-05          Refine grid             Train
+    14         306           31687         11.1638     1.52588e-05          Refine grid             Train
+    15         307           31692         9.88454     1.52588e-05      Incremental search (ES-wcm)        
+    15         308         31691.5         9.82636     1.52588e-05      Incremental search (ES-ell)        
+    15         323         31691.5         9.82636      3.8147e-06          Refine grid             Train
+    16         341         31692.4         9.03757     9.53674e-07          Refine grid             Train
+Optimization terminated: change in the function value less than options['tol_mesh']
+Estimated function value at minimum: 31698.11780141907 ± 35.67055134618452 (mean ± SEM from 10 samples)
+Any[0.005, 0.005, 0.3, 1.0, 1, 1]
+Any[0.01, 0.01, 0.9, 1.5, 9, 4]
+True Model: DDM(0.005000000388393946, 0.008370992174275298, 0.5383849748592001, 1.1641804840146905, 8.25013707370397, 3.709816350978768)
+True Log Likelihood: (-31620.220749440734, 96.03823454830884)

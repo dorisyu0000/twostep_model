@@ -97,7 +97,7 @@ function apply_inhibition!(model::DDM, dv, dv_alt)
     end
 end
 
-function simulate_two_stage_inhibition(model::DDM, v1::Vector{Float64}, v2::Vector{Float64}; maxt=5000, logger=(dv, stage, t) -> nothing)
+function simulate_two_stage_inhibition(model::DDM, v1::Vector{Float64}, v2::Vector{Float64}; maxt=1000, logger=(dv, stage, t) -> nothing)
     N = length(v2)  # There are always 3/4 options in the two-stage decision model
     noise1 = Normal(0,0.1)
     noise2 = Normal(0,0.1)
@@ -168,7 +168,7 @@ function simulate_two_stage_inhibition(model::DDM, v1::Vector{Float64}, v2::Vect
     return (0, -1, -1)
 end
 
-function simulate_two_stage(model::DDM, v1::Vector{Float64}, v2::Vector{Float64}; maxt=5000, logger=(dv, stage, t) -> nothing)
+function simulate_two_stage(model::DDM, v1::Vector{Float64}, v2::Vector{Float64}; maxt=100, logger=(dv, stage, t) -> nothing)
     N = length(v2)  # There are always 3/4 options in the two-stage decision model
 
     noise1 = Normal(0,0.1)
@@ -242,75 +242,6 @@ function simulate_two_stage(model::DDM, v1::Vector{Float64}, v2::Vector{Float64}
 end
 
 
-function simulate_one_stage(model::DDM, v1::Vector{Float64}, v2::Vector{Float64}; maxt=5000, logger=(dv, stage, t) -> nothing)
-    N = length(v2)  # There are always 3/4 options in the two-stage decision model
 
-    noise1 = Normal(0,0.1)
-    noise2 = Normal(0,0.1)
-    t1_error = model.t1_error
-    t2_error = model.t2_error
-    v,v1,v2 = value_function(v1, v2)
-    stage1_drifts = model.d1 .* v
-    stage2_drifts = model.d2 .* v2 
-    rt1, rt2 = 0, 0
-    choice1, choice2 = 0, 0
-
-    # Stage 1: Decide between L and R
-    dv = zeros(N)
-    # dv_alt = zeros(N)
-    for t in 1:maxt
-        logger(copy(dv), 1, t)
-
-        # ε1 = rand(noise1)
-        # ε2 = rand(noise1)
-        # dv[i] += stage1_drifts[i] + stage1_noise + rand(noise1)
-        
-        for i in 1:N
-            dv[i] += stage1_drifts[i] + rand(noise1)
-        end
-        # apply_inhibition!(model, dv, dv_alt)
-        choice1 = final_termination(dv, model.threshold1)
-        if choice1 != 0
-            rt1 = t + t1_error
-            break
-        end
-    end
-
-    # if model.restart_stage2
-    #     dv .= 0
-    # end
-
-    # Stage 2
-    if N == 3
-        indices = choice1 < 3 ? [1,2] : [3]  # Adjusted for a 3-option scenario
-    elseif N == 4
-        indices = choice1 < 3 ? [1, 2] : [3, 4]  # Original setup for 4 options
-    end
-
-    # Assuming decision can be made directly if only one option
-    if length(indices) == 1
-        rt2 = t2_error # Assuming a fixed time for the second decision
-        return (choice1, rt1, rt2)
-    end
-
-    # Otherwise, possibly change decision
-    for t in 1:(maxt-rt1)
-        # reset dv 
-        dv .= 0
-        # Stage 1: Decide between L and R
-        for i in indices
-            dv[i] += stage2_drifts[i] + rand(noise2)  # Continue accumulating evidence for the second decision
-        end
-        # apply_inhibition!(model, @view(dv[indices]), dv_alt)
-        choice = final_termination(@view(dv_stage2[indices]), model.threshold2)  # Pass the relevant evidence to final_termination
-
-        if choice != 0
-            choice2 = indices[choice]
-            rt2 = t + t2_error # Calculate the reaction time for the second decision
-            return (choice2, rt1, rt2)
-        end
-    end
-    return (0, -1, -1)
-end
 
 
