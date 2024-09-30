@@ -102,8 +102,8 @@ function load_trials(filename::String)
                 Float64.(data["value1"]),
                 Float64.(data["value2"]),
                 data["choice2"],
-                Int(round(data["rt1"]/100)),
-                Int(round(data["rt2"]/100))
+                data["rt1"],
+                data["rt2"]
             )
             push!(trials, trial)
         end
@@ -138,7 +138,7 @@ upper_bounds = JSON.parse(ENV["UPPER_BOUNDS"])
 
 
 #Two stage DDM
-bads = optimize_bads(lower_bounds=lower_bounds, upper_bounds=upper_bounds, specify_target_noise=true, tol_fun=5, max_fun_evals=1000) do params
+bads = optimize_bads(lower_bounds=lower_bounds, upper_bounds=upper_bounds, specify_target_noise=true, tol_fun=5, max_fun_evals=1) do params
     # Extract parameters from the vector
     d1, d2, threshold1, threshold2, t1_error, t2_error= params
     model = DDM(d1=d1, d2=d2, threshold1=threshold1, threshold2=threshold2, t1_error=t1_error, t2_error=t2_error)

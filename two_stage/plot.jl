@@ -2,10 +2,12 @@ using Pkg
 using Distributed
 using JSON
 using Plots
+using RCall
+using DataFrames
 
 
 
-    include("ddm_inhb.jl")
+    include("ddm.jl")
     include("box.jl")
     include("ibs.jl")
 
@@ -80,17 +82,17 @@ function calculate_difficulty(rewards::Vector{Float64})
 end
 
 file_trials = load_trials("AllTrial.json")
-trial_1 = load_trials("trials1.json")
-trial_2 = load_trials("trials2.json")
+trial_1 = load_trials("trials2.json")
+trial_2 = load_trials("trials1.json")
 
 
 # Define the DDM model parameters
-parameters1 = [0.005859494247718415, 0.02975827291885197, 0.53688125, 0.9901999999999999, 13.0, 6.0]
-model = DDM_inhb(0.00693458974576076, 0.01099803975014784, 0.549015027867913, 0.987650683005397, 14.045589015309448, 1.059411932510365, 0.03204594505578, 0.02001855203555304)
+parameters1 = [0.05859494247718415, 0.02975827291885197, 0.53688125, 0.9901999999999999, 13.0, 6.0]
+# model = DDM_inhb(0.0093458974576076, 0.01099803975014784, 0.529015027867913, 0.887650683005397, 14.045589015309448, 1.59411932510365, 0.03204594505578, 0.03001855203555304)
 # model = DDM(0.008783272201699212, 0.02000252503317679, 0.54688125, 0.9929024645912078, 15.568269433353877, 7.640827345191999)
 # model = DDM(0.004901306944711048, 0.01827669192844268, 0.4917352094165164, 0.9285735791587721, 9.999999999999993, 4.403870491950274)
-# model = DDM(0.0050840931549732664, 0.015486032258723427, 0.5571922706540302, 1.0000000000008584, 12.005657553271893, 6.391783543961144)
-# model = DDM_inhb(0.008726529863138292, 0.010008232021078822, 0.6812176275686801, 1.499944663320936, 10.033504640268763, 0.509387776355169, 0.08457085792362388, 0.04944467305109707)
+model = DDM(0.0090840931549732664, 0.015486032258723427, 0.5571922706540302, 1.0000000000008584, 12.005657553271893, 6.391783543961144)
+# model = DDM_inhb(0.009726529863138292, 0.010008232021078822, 0.6812176275686801, 1.99944663320936, 10.033504640268763, 1.509387776355169, 0.08457085792362388, 0.02944467305109707)
 # model = DDM(0.0044862351481092634, 0.01410375304853078, 0.5111433272885392, 1.0223317948525654, 9.989053798147943, 4.674152437064331)
 # Function to simulate trials
 
@@ -188,69 +190,141 @@ function calculate_metrics(trials)
 end
 
 
+function prepare_data(avg_data::Array{Tuple{Float64, Float64, Float64}}, group_label::String)
+    df = DataFrame(
+        Difficulty = [x[1] for x in avg_data],
+        Value = [x[2] for x in avg_data],
+        SE = [x[3] for x in avg_data],
+        Group = group_label
+    )
 
+    # Standardize the x and y values
+    df.Difficulty = (df.Difficulty .- mean(df.Difficulty)) ./ std(df.Difficulty)
+    df.Value = (df.Value .- mean(df.Value)) ./ std(df.Value)
+    return df
+end
+
+# Helper function to prepare RT2 by Diff2 data
+function prepare_rt2_diff2_data(trials, group_label::String)
+    data = [(trial.diff_2, trial.rt2 * 100) for trial in trials]
+    df = DataFrame(
+        Diff2 = [x[1] for x in data],
+        RT2 = [x[2] for x in data],
+        Group = group_label
+    )
+
+    # Standardize Diff2 and RT2
+    df.Diff2 = (df.Diff2 .- mean(df.Diff2)) ./ std(df.Diff2)
+    df.RT2 = (df.RT2 .- mean(df.RT2)) ./ std(df.RT2)
+    return df
+end
+
+# Modified plot_and_save function
 function plot_and_save(trials, random_trials, filename)
+    # Calculate metrics
     avg_rt1, avg_rt2, avg_acc = calculate_metrics(trials)
     avg_rt1_random, avg_rt2_random, avg_acc_random = calculate_metrics(random_trials)
 
-    plt = plot(layout=3, size=(900, 400), legend=:outertopright)
-    xticks = 2:12  # Example tick positions, adjust as needed
+    # Prepare and standardize data
+    df_rt1_exp = prepare_data(avg_rt1, "Experiment")
+    df_rt1_model = prepare_data(avg_rt1_random, "Model")
+    df_rt2_exp = prepare_data(avg_rt2, "Experiment")
+    df_rt2_model = prepare_data(avg_rt2_random, "Model")
+    df_acc_exp = prepare_data(avg_acc, "Experiment")
+    df_acc_model = prepare_data(avg_acc_random, "Model")
 
-    # Plot RT1 with error bars
-    plot!(plt[1], [x[1] for x in avg_rt1], [x[2] for x in avg_rt1], yerr=[x[3] for x in avg_rt1], label="RT1 - Experiment", color=:blue, marker=:circle, xticks=xticks)
-    plot!(plt[1], [x[1] for x in avg_rt1_random], [x[2] for x in avg_rt1_random], yerr=[x[3] for x in avg_rt1_random], label="RT1 - Model", color=:red, marker=:square, xticks=xticks)
+    # Combine data frames
+    df_rt1 = vcat(df_rt1_exp, df_rt1_model)
+    df_rt2 = vcat(df_rt2_exp, df_rt2_model)
+    df_acc = vcat(df_acc_exp, df_acc_model)
 
-    # Plot RT2 with error bars
-    plot!(plt[2], [x[1] for x in avg_rt2], [x[2] for x in avg_rt2], yerr=[x[3] for x in avg_rt2], label="RT2 - Experiment", color=:blue, marker=:circle, xticks=xticks)
-    plot!(plt[2], [x[1] for x in avg_rt2_random], [x[2] for x in avg_rt2_random], yerr=[x[3] for x in avg_rt2_random], label="RT2 - Model", color=:red, marker=:square, xticks=xticks)
+    # Prepare data for RT2 by Diff2
+    df_rt2_diff2_exp = prepare_rt2_diff2_data(trials, "Experiment")
+    df_rt2_diff2_model = prepare_rt2_diff2_data(random_trials, "Model")
+    df_rt2_diff2 = vcat(df_rt2_diff2_exp, df_rt2_diff2_model)
 
-    # Plot Accuracy with error bars (assuming it's meaningful to calculate a standard error for accuracy)
-    plot!(plt[3], [x[1] for x in avg_acc], [x[2] for x in avg_acc], yerr=[x[3] for x in avg_acc], label="Accuracy - Experiment", color=:blue, marker=:circle, xticks=xticks)
-    plot!(plt[3], [x[1] for x in avg_acc_random], [x[2] for x in avg_acc_random], label="Accuracy - Model", color=:red, marker=:circle, xticks=xticks)
+    # Convert Julia DataFrames to R data frames
+    @rput df_rt1 df_rt2 df_acc df_rt2_diff2
 
-    savefig(plt, filename)
+    # Load required R libraries
+    R"""
+    library(ggplot2)
+    library(gridExtra)
+
+    # Plot RT1
+    p1 <- ggplot(df_rt1, aes(x = Difficulty, y = Value, color = Group)) +
+        geom_point() +
+        geom_errorbar(aes(ymin = Value - SE, ymax = Value + SE), width = 0.2) +
+        labs(title = "RT1", x = "Standardized Difficulty", y = "Standardized Reaction Time") +
+        theme_minimal()
+
+    # Plot RT2
+    p2 <- ggplot(df_rt2, aes(x = Difficulty, y = Value, color = Group)) +
+        geom_point() +
+        geom_errorbar(aes(ymin = Value - SE, ymax = Value + SE), width = 0.2) +
+        labs(title = "RT2", x = "Standardized Difficulty", y = "Standardized Reaction Time") +
+        theme_minimal()
+
+    # Plot Accuracy
+    p3 <- ggplot(df_acc, aes(x = Difficulty, y = Value, color = Group)) +
+        geom_point() +
+        geom_errorbar(aes(ymin = Value - SE, ymax = Value + SE), width = 0.2) +
+        labs(title = "Accuracy", x = "Standardized Difficulty", y = "Standardized Accuracy") +
+        theme_minimal()
+
+    # Plot RT2 by Diff2
+    p4 <- ggplot(df_rt2_diff2, aes(x = Diff2, y = RT2, color = Group)) +
+        geom_point() +
+        labs(title = "RT2 by Diff2", x = "Standardized Diff2", y = "Standardized RT2 (scaled)") +
+        theme_minimal()
+
+    # Arrange the plots in a grid
+    g <- grid.arrange(p1, p2, p3, p4, ncol = 2)
+
+    # Save the combined plot
+    ggsave(filename = $filename, plot = g, width = 10, height = 8)
+    """
 end
 
+# function plot_RT2(trials, random_trials, filename)
+#     # Helper function to calculate stats
+#     function calc_stats(data::Vector{Float64})
+#         mu = mean(data)
+#         se = std(data) / sqrt(length(data))
+#         return (mu, se)
+#     end
 
-function plot_RT2(trials, random_trials, filename)
-    # Helper function to calculate stats
-    function calc_stats(data::Vector{Float64})
-        mu = mean(data)
-        se = std(data) / sqrt(length(data))
-        return (mu, se)
-    end
+#     # Extracting RT2 data based on diff_2
+#     function extract_rt2_data(trials)
+#         rt2_by_diff_2 = Dict()
+#         for trial in trials
+#             if trial.diff_2 in 1:8  # Assuming diff_2 ranges from -8 to 8
+#                 push!(get!(rt2_by_diff_2, trial.diff_2, Float64[]), trial.rt2 * 100)  # Scaling RT2 by 100 for visibility
+#             end
+#         end
+#         return rt2_by_diff_2
+#     end
 
-    # Extracting RT2 data based on diff_2
-    function extract_rt2_data(trials)
-        rt2_by_diff_2 = Dict()
-        for trial in trials
-            if trial.diff_2 in 1:8  # Assuming diff_2 ranges from -8 to 8
-                push!(get!(rt2_by_diff_2, trial.diff_2, Float64[]), trial.rt2 * 100)  # Scaling RT2 by 100 for visibility
-            end
-        end
-        return rt2_by_diff_2
-    end
+#     rt2_data = extract_rt2_data(trials)
+#     rt2_random_data = extract_rt2_data(random_trials)
 
-    rt2_data = extract_rt2_data(trials)
-    rt2_random_data = extract_rt2_data(random_trials)
+#     # Calculate average RT2 and standard errors
+#     avg_rt2 = [(diff_2, calc_stats(data)...) for (diff_2, data) in rt2_data]
+#     avg_rt2_random = [(diff_2, calc_stats(data)...) for (diff_2, data) in rt2_random_data]
 
-    # Calculate average RT2 and standard errors
-    avg_rt2 = [(diff_2, calc_stats(data)...) for (diff_2, data) in rt2_data]
-    avg_rt2_random = [(diff_2, calc_stats(data)...) for (diff_2, data) in rt2_random_data]
+#     # Sorting data for consistent plotting
+#     sort!(avg_rt2, by = x -> x[1])
+#     sort!(avg_rt2_random, by = x -> x[1])
 
-    # Sorting data for consistent plotting
-    sort!(avg_rt2, by = x -> x[1])
-    sort!(avg_rt2_random, by = x -> x[1])
+#     # Plotting
+#     plt = plot(size=(600, 400), legend=:outertopright, title="RT2 by Diff2")
+#     plot!(plt, [x[1] for x in avg_rt2], [x[2] for x in avg_rt2], ribbon=[x[3] for x in avg_rt2], label="RT2 - Experiment", color=:blue, marker=:circle)
+#     plot!(plt, [x[1] for x in avg_rt2_random], [x[2] for x in avg_rt2_random], ribbon=[x[3] for x in avg_rt2_random], label="RT2 - Model", color=:red, marker=:square)
 
-    # Plotting
-    plt = plot(size=(600, 400), legend=:outertopright, title="RT2 by Diff2")
-    plot!(plt, [x[1] for x in avg_rt2], [x[2] for x in avg_rt2], ribbon=[x[3] for x in avg_rt2], label="RT2 - Experiment", color=:blue, marker=:circle)
-    plot!(plt, [x[1] for x in avg_rt2_random], [x[2] for x in avg_rt2_random], ribbon=[x[3] for x in avg_rt2_random], label="RT2 - Model", color=:red, marker=:square)
-
-    xlabel!(plt, "Diff2")
-    ylabel!(plt, "Reaction Time (scaled)")
-    savefig(plt, filename)
-end
+#     xlabel!(plt, "Diff2")
+#     ylabel!(plt, "Reaction Time (scaled)")
+#     savefig(plt, filename)
+# end
 
 
 
